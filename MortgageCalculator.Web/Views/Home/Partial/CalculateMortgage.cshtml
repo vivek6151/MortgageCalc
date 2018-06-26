@@ -1,0 +1,89 @@
+﻿<script>
+    $(document).ready(function () {
+        $("#result").hide();
+        $("#btnCalculate").click(function () {            
+            $("#mortgageForm").valid();
+            //alert($(".has-error").length);
+            if ($(".has-error").length == 0) {
+                var amount = $("#txtLoanAmount").val();
+                var interest = $("#txtInterestRate").val() / 100;
+                var period = $("#txtTermsInMonths").val();
+
+                var monthlyPayment = getMonthlyPayment(amount, interest / 12, period);
+                var totalrepayment = monthlyPayment * period;
+                $("#lblTotalRepayment").append(parseInt(totalrepayment));
+                $("#lblTotalInterestPaid").append(parseInt(totalrepayment - amount));
+
+                $("#result").show();
+            }
+        });
+    });
+    function getMonthlyPayment(amount, interest, period) {
+        amount = parseFloat(amount);
+        interest = parseFloat(interest);
+        period = parseFloat(period);
+
+        var _return = amount * interest * (Math.pow(1 + interest, period)) / (Math.pow(1 + interest, period) - 1);
+        _return = _return.toFixed(2);
+        return _return;
+    }
+</script>
+
+
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "mortgageForm", @class = "form-horizontal", role = "form" }))
+{
+    @Html.AntiForgeryToken()
+    HtmlHelper.UnobtrusiveJavaScriptEnabled = false;
+    <div class="form-horizontal">
+        <!--<h4>Mortgage</h4>-->
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        <div class="form-group">
+            @Html.Label("Loan Amount", htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.Editor("txtLoanAmount", new { htmlAttributes = new { @class = "form-control", @id = "txtLoanAmount"} })
+                @Html.ValidationMessage("txtLoanAmount", "", new { @class = "text-danger" })
+            </div>
+
+        </div>
+
+        <div class="form-group">
+            @Html.Label("Interest Rate", htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.Editor("txtInterestRate", new { htmlAttributes = new { @class = "form-control", @id = "txtInterestRate" } })
+                @Html.ValidationMessage("txtInterestRate", "", new { @class = "text-danger" })
+            </div>
+
+        </div>
+
+        <div class="form-group">
+            @Html.Label("Terms in Months", htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.Editor("txtTermsInMonths", new { htmlAttributes = new { @class = "form-control", @id = "txtTermsInMonths" } })
+                @Html.ValidationMessage("txtTermsInMonths", "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+
+
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="button" value="Calculate" class="btn btn-primary" id="btnCalculate" />
+            </div>
+        </div>
+        <div class="form-group" id="result">
+            <div class="col-md-offset-1 col-md-5">
+                @Html.Label("Total Amount Repayable: ", htmlAttributes: new { @id = "lblTotalRepayment" })
+            </div>
+            <div class="col-md-offset-1 col-md-5">
+                @Html.Label("Total Interest: ", htmlAttributes: new { @id = "lblTotalInterestPaid" })
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts
+{
+    @Scripts.Render("~/bundles/custom-validator")
+}
